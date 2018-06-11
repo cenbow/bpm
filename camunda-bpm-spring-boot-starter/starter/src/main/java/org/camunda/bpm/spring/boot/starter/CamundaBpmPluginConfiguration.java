@@ -1,7 +1,7 @@
 package org.camunda.bpm.spring.boot.starter;
 
 import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
-import org.camunda.connect.plugin.impl.ConnectProcessEnginePlugin;
+//import org.camunda.connect.plugin.impl.ConnectProcessEnginePlugin;
 import org.camunda.spin.plugin.impl.SpinProcessEnginePlugin;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -22,14 +22,14 @@ public class CamundaBpmPluginConfiguration {
     }
   }
 
-  @ConditionalOnClass(ConnectProcessEnginePlugin.class)
-  @Configuration
-  static class ConnectConfiguration {
-
-    @Bean
-    @ConditionalOnMissingBean(name = "connectProcessEnginePlugin")
-    public static ProcessEnginePlugin connectProcessEnginePlugin() {
-      return new ConnectProcessEnginePlugin();
-    }
-  }
+//  @ConditionalOnClass(ConnectProcessEnginePlugin.class)
+//  @Configuration
+//  static class ConnectConfiguration {
+//
+//    @Bean
+//    @ConditionalOnMissingBean(name = "connectProcessEnginePlugin")
+//    public static ProcessEnginePlugin connectProcessEnginePlugin() {
+//      return new ConnectProcessEnginePlugin();
+//    }
+//  }
 }
