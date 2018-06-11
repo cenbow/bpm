@@ -1,0 +1,81 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <name>camunda Commons - Typed Values</name>
+  <artifactId>camunda-commons-typed-values</artifactId>
+
+  <parent>
+    <groupId>org.camunda.commons</groupId>
+    <artifactId>camunda-commons-root</artifactId>
+    <version>1.5.1</version>
+  </parent>
+
+  <properties>
+    <version.old>1.4.0</version.old>
+  </properties>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>org.camunda.commons</groupId>
+      <artifactId>camunda-commons-utils</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest-library</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>clirr-maven-plugin</artifactId>
+        <configuration>
+          <comparisonVersion>${version.old}</comparisonVersion>
+          <logResults>true</logResults>
+          <excludes>
+            <exclude>org/camunda/bpm/engine/impl/**</exclude>
+          </excludes>
+        </configuration>
+        <executions>
+          <execution>
+            <id>all</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>check-no-fork</goal>
+            </goals>
+            <configuration>
+              <textOutputFile>${project.build.directory}/clirr-all.txt</textOutputFile>
+              <failOnWarning>false</failOnWarning>
+              <failOnError>false</failOnError>
+            </configuration>
+          </execution>
+          <execution>
+            <id>restrictive</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>check-no-fork</goal>
+            </goals>
+            <configuration>
+              <textOutputFile>${project.build.directory}/clirr-restrictive.txt</textOutputFile>
+              <failOnWarning>true</failOnWarning>
+              <ignoredDifferencesFile>.clirr-jenkins-ignore.xml</ignoredDifferencesFile>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

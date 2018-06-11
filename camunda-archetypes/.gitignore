@@ -1,0 +1,7 @@
+target/
+.settings/
+.bpmn/
+.classpath
+.project
+*.iml
+.idea/

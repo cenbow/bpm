@@ -1,0 +1,152 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <!-- camunda BPM parent release pom -->
+  <parent>
+    <groupId>org.camunda.spin</groupId>
+    <artifactId>camunda-spin-bom</artifactId>
+    <version>1.5.3</version>
+    <relativePath>bom</relativePath>
+  </parent>
+
+  <artifactId>camunda-spin-root</artifactId>
+  <name>camunda Spin - root</name>
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>bom</module>
+    <module>core</module>
+    <module>dataformat-json-jackson</module>
+    <module>dataformat-xml-dom</module>
+    <module>dataformat-all</module>
+  </modules>
+
+  <properties>
+    <jackson.version>2.9.5</jackson.version>
+    <spin.version.old>1.5.1</spin.version.old>
+    <groovy.version>2.4.13</groovy.version>
+    <license.includeTransitiveDependencies>false</license.includeTransitiveDependencies>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+
+      <dependency>
+        <groupId>org.camunda.commons</groupId>
+        <artifactId>camunda-commons-bom</artifactId>
+        <version>1.5.1</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.11</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.assertj</groupId>
+        <artifactId>assertj-core</artifactId>
+        <version>1.5.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.codehaus.groovy</groupId>
+        <artifactId>groovy-all</artifactId>
+        <version>${groovy.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.python</groupId>
+        <artifactId>jython</artifactId>
+        <version>2.5.3</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jruby</groupId>
+        <artifactId>jruby-complete</artifactId>
+        <version>1.7.13</version>
+      </dependency>
+
+      <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-classic</artifactId>
+        <version>1.1.2</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>net.javacrumbs.json-unit</groupId>
+        <artifactId>json-unit-fluent</artifactId>
+        <version>1.1.6</version>
+      </dependency>
+
+    </dependencies>
+  </dependencyManagement>
+  <profiles>
+    <profile>
+      <id>jackson-26</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <properties>
+        <jackson.version>2.6.3</jackson.version>
+      </properties>
+    </profile>
+  </profiles>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.17</version>
+          <configuration>
+            <redirectTestOutputToFile>true</redirectTestOutputToFile>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>maven-bundle-plugin</artifactId>
+          <configuration>
+            <instructions>
+              <Export-Package>org.camunda.spin*</Export-Package>
+            </instructions>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <version>1.14</version>
+        <configuration>
+          <acceptPomPackaging>true</acceptPomPackaging>
+          <excludedScopes>test</excludedScopes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <scm>
+    <url>https://github.com/camunda/camunda-spin</url>
+    <connection>scm:git:git@github.com:camunda/camunda-spin.git</connection>
+    <developerConnection>scm:git:git@github.com:camunda/camunda-spin.git</developerConnection>
+    <tag>1.5.3</tag>
+  </scm>
+
+</project>

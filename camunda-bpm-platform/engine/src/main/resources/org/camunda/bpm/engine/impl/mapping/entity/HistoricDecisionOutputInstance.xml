@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.camunda.bpm.engine.impl.history.event.HistoricDecisionOutputInstanceEntity">
+
+ <!-- insert -->
+ 
+  <insert id="insertHistoricDecisionOutputInstance" parameterType="org.camunda.bpm.engine.impl.history.event.HistoricDecisionOutputInstanceEntity">
+     insert into ${prefix}ACT_HI_DEC_OUT(
+          ID_, 
+          DEC_INST_ID_, 
+          CLAUSE_ID_, 
+          CLAUSE_NAME_, 
+          RULE_ID_, 
+          RULE_ORDER_, 
+          VAR_NAME_,
+          VAR_TYPE_,
+          BYTEARRAY_ID_,
+          DOUBLE_,
+          LONG_,
+          TEXT_,
+          TEXT2_,
+          TENANT_ID_
+     ) values (
+          #{id, jdbcType=VARCHAR},
+          #{decisionInstanceId, jdbcType=VARCHAR},
+          #{clauseId, jdbcType=VARCHAR},
+          #{clauseName, jdbcType=VARCHAR},
+          #{ruleId, jdbcType=VARCHAR},
+          #{ruleOrder, jdbcType=INTEGER},
+          #{variableName, jdbcType=VARCHAR},
+          #{serializerName, jdbcType=VARCHAR},
+          #{byteArrayValueId, jdbcType=VARCHAR},
+          #{doubleValue, jdbcType=DOUBLE},
+          #{longValue, jdbcType=BIGINT},
+          #{textValue, jdbcType=VARCHAR},
+          #{textValue2, jdbcType=VARCHAR},
+          #{tenantId, jdbcType=VARCHAR}
+     )
+  </insert>
+  
+  <!-- delete -->
+  
+  <delete id="deleteHistoricDecisionOutputInstance" parameterType="org.camunda.bpm.engine.impl.history.event.HistoricDecisionOutputInstanceEntity">
+    delete from ${prefix}ACT_HI_DEC_OUT where ID_ = #{id}
+  </delete>
+
+  <delete id="deleteHistoricDecisionOutputInstanceByDecisionInstanceIds" parameterType="org.camunda.bpm.engine.impl.db.ListQueryParameterObject">
+    delete from ${prefix}ACT_HI_DEC_OUT
+    where
+      <bind name="listOfIds" value="list"/>
+      <bind name="fieldName" value="'DEC_INST_ID_'"/>
+      <include refid="org.camunda.bpm.engine.impl.persistence.entity.Commons.applyInForPaginatedCollection"/>
+  </delete>
+
+  <delete id="deleteHistoricDecisionOutputInstanceByteArraysByDecisionInstanceIds">
+    delete from ${prefix}ACT_GE_BYTEARRAY
+    where ID_ in (
+      select distinct BYTEARRAY_ID_
+      from ${prefix}ACT_HI_DEC_OUT
+      where
+        <bind name="listOfIds" value="list"/>
+        <bind name="fieldName" value="'DEC_INST_ID_'"/>
+        <include refid="org.camunda.bpm.engine.impl.persistence.entity.Commons.applyInForPaginatedCollection"/>
+        and BYTEARRAY_ID_ is not NULL
+    )
+  </delete>
+
+  <delete id="deleteHistoricDecisionOutputInstanceByteArraysByDecisionInstanceIds_mysql">
+    delete B from ${prefix}ACT_GE_BYTEARRAY B
+    inner join ${prefix}ACT_HI_DEC_OUT D
+      on B.ID_ = D.BYTEARRAY_ID_
+      and D.DEC_INST_ID_ in
+        <foreach item="decisionInstanceId" index="index" collection="list" open="(" separator="," close=")">
+          #{decisionInstanceId}
+        </foreach>
+      and D.BYTEARRAY_ID_ is not NULL
+  </delete>
+
+  <!-- result map -->
+
+  <resultMap id="historicDecisionOutputInstanceResultMap" type="org.camunda.bpm.engine.impl.history.event.HistoricDecisionOutputInstanceEntity">
+    <id property="id" column="ID_" jdbcType="VARCHAR" />
+    <result property="decisionInstanceId" column="DEC_INST_ID_" jdbcType="VARCHAR"/>
+    <result property="clauseId" column="CLAUSE_ID_" jdbcType="VARCHAR"/>
+    <result property="clauseName" column="CLAUSE_NAME_" jdbcType="VARCHAR"/>
+    <result property="ruleId" column="RULE_ID_" jdbcType="VARCHAR" />
+    <result property="ruleOrder" column="RULE_ORDER_" jdbcType="INTEGER" />
+    <result property="variableName" column="VAR_NAME_" jdbcType="VARCHAR"/>
+    <result property="serializerName" column="VAR_TYPE_" jdbcType="VARCHAR"/>
+    <result property="byteArrayValueId" column="BYTEARRAY_ID_" jdbcType="VARCHAR" />
+    <result property="doubleValue" column="DOUBLE_" jdbcType="DOUBLE" />
+    <result property="textValue" column="TEXT_" jdbcType="VARCHAR" />
+    <result property="textValue2" column="TEXT2_" jdbcType="VARCHAR" />
+    <result property="longValue" column="LONG_" jdbcType="BIGINT" />
+    <result property="tenantId" column="TENANT_ID_" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <!-- select -->
+
+  <select id="selectHistoricDecisionOutputInstancesByDecisionInstanceId" parameterType="org.camunda.bpm.engine.impl.db.ListQueryParameterObject" resultMap="historicDecisionOutputInstanceResultMap">
+    select * from ${prefix}ACT_HI_DEC_OUT
+    where DEC_INST_ID_ = #{parameter, jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectHistoricDecisionOutputInstance" parameterType="org.camunda.bpm.engine.impl.db.ListQueryParameterObject" resultMap="historicDecisionOutputInstanceResultMap">
+    select * from ${prefix}ACT_HI_DEC_OUT
+    where ID_ = #{parameter, jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectHistoricDecisionOutputInstancesByDecisionInstanceIds" parameterType="org.camunda.bpm.engine.impl.db.ListQueryParameterObject" resultMap="historicDecisionOutputInstanceResultMap">
+    select * from ${prefix}ACT_HI_DEC_OUT
+    where
+      <bind name="listOfIds" value="parameter"/>
+      <bind name="fieldName" value="'DEC_INST_ID_'"/>
+      <include refid="org.camunda.bpm.engine.impl.persistence.entity.Commons.applyInForPaginatedCollection"/>
+    order by RULE_ORDER_, CLAUSE_ID_
+  </select>
+
+</mapper>

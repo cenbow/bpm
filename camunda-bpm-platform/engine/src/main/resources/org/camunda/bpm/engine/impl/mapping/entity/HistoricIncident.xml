@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+
+<mapper namespace="org.camunda.bpm.engine.impl.persistence.entity.HistoricIncidentEntity">
+
+  <!-- HISTORIC INCIDENT INSERT -->
+
+  <insert id="insertHistoricIncidentEvent" parameterType="org.camunda.bpm.engine.impl.history.event.HistoricIncidentEventEntity">
+      insert into ${prefix}ACT_HI_INCIDENT (
+        ID_,
+        PROC_DEF_KEY_,
+        PROC_DEF_ID_,
+        PROC_INST_ID_,
+        EXECUTION_ID_,
+        CREATE_TIME_,
+        END_TIME_,
+        INCIDENT_MSG_,
+        INCIDENT_TYPE_,
+        ACTIVITY_ID_,
+        CAUSE_INCIDENT_ID_,
+        ROOT_CAUSE_INCIDENT_ID_,
+        CONFIGURATION_,
+        INCIDENT_STATE_,
+        TENANT_ID_,
+        JOB_DEF_ID_
+      ) values (
+        #{id ,jdbcType=VARCHAR},
+        #{processDefinitionKey, jdbcType=VARCHAR},
+        #{processDefinitionId, jdbcType=VARCHAR},
+        #{processInstanceId, jdbcType=VARCHAR},
+        #{executionId, jdbcType=VARCHAR},
+        #{createTime, jdbcType=TIMESTAMP},
+        #{endTime, jdbcType=TIMESTAMP},
+        #{incidentMessage, jdbcType=VARCHAR},
+        #{incidentType, jdbcType=VARCHAR},
+        #{activityId ,jdbcType=VARCHAR},
+        #{causeIncidentId ,jdbcType=VARCHAR},
+        #{rootCauseIncidentId ,jdbcType=VARCHAR},
+        #{configuration, jdbcType=VARCHAR},
+        #{incidentState, jdbcType=INTEGER},
+        #{tenantId, jdbcType=VARCHAR},
+        #{jobDefinitionId, jdbcType=VARCHAR}
+      )
+  </insert>
+
+  <!-- HISTORIC INCIDENT UPDATE -->
+
+  <update id="updateHistoricIncidentEvent" parameterType="org.camunda.bpm.engine.impl.history.event.HistoricIncidentEventEntity">
+    update
+      ${prefix}ACT_HI_INCIDENT
+    set
+      <!-- MySQL requires timestamps to always be part of the 
+      UPDATE statement or else it is going to update them to the current time -->
+      CREATE_TIME_ = #{createTime, jdbcType=TIMESTAMP},
+      END_TIME_ = #{endTime, jdbcType=TIMESTAMP},
+      INCIDENT_STATE_ = #{incidentState, jdbcType=INTEGER},
+      PROC_DEF_KEY_ = #{processDefinitionKey, jdbcType=VARCHAR},
+      PROC_DEF_ID_ = #{processDefinitionId, jdbcType=VARCHAR},
+      EXECUTION_ID_ = #{executionId, jdbcType=VARCHAR},
+      ACTIVITY_ID_ = #{activityId, jdbcType=VARCHAR},
+      JOB_DEF_ID_ = #{jobDefinitionId, jdbcType=VARCHAR}
+    where
+      ID_ = #{id, jdbcType=VARCHAR}
+  </update>
+
+  <!-- HISTORIC INCIDENT DELETE -->
+
+  <delete id="deleteHistoricIncident" parameterType="org.camunda.bpm.engine.impl.persistence.entity.HistoricIncidentEntity">
+    delete from ${prefix}ACT_HI_INCIDENT where ID_ = #{id}
+  </delete>
+
+  <delete id="deleteHistoricIncidentsByProcessInstanceId">
+    delete from ${prefix}ACT_HI_INCIDENT where PROC_INST_ID_ = #{processInstanceId}
+  </delete>
+
+  <delete id="deleteHistoricIncidentsByProcessInstanceIds">
+    delete from ${prefix}ACT_HI_INCIDENT
+    where
+      <bind name="listOfIds" value="list"/>
+      <bind name="fieldName" value="'PROC_INST_ID_'"/>
+      <include refid="org.camunda.bpm.engine.impl.persistence.entity.Commons.applyInForPaginatedCollection"/>
+  </delete>
+
+  <delete id="deleteHistoricIncidentsByProcessDefinitionId">
+    delete from ${prefix}ACT_HI_INCIDENT where PROC_DEF_ID_ = #{processDefinitionId} and PROC_INST_ID_ is null
+  </delete>
+
+  <delete id="deleteHistoricIncidentsByJobDefinitionId">
+    delete from ${prefix}ACT_HI_INCIDENT where JOB_DEF_ID_ = #{jobDefinitionId}
+  </delete>
+
+  <delete id="deleteHistoricIncidentsByBatchIds">
+    delete from ${prefix}ACT_HI_INCIDENT
+    where ID_
+    in (<include refid="selectHistoricIncidentsByBatchIds" />)
+  </delete>
+
+  <delete id="deleteHistoricIncidentsByBatchIds_mysql">
+    delete HI.*
+    <include refid="selectHistoricIncidentsByBatchIdsSql" />
+  </delete>
+
+  <!-- HISTORIC INCIDENT RESULTMAP -->
+
+  <resultMap id="historicIncidentResultMap" type="org.camunda.bpm.engine.impl.persistence.entity.HistoricIncidentEntity">
+    <id property="id" column="ID_" jdbcType="VARCHAR" />
+    <result property="processDefinitionKey" column="PROC_DEF_KEY_" jdbcType="VARCHAR" />
+    <result property="processDefinitionId" column="PROC_DEF_ID_" jdbcType="VARCHAR" />
+    <result property="processInstanceId" column="PROC_INST_ID_" jdbcType="VARCHAR" />
+    <result property="executionId" column="EXECUTION_ID_" jdbcType="VARCHAR" />
+    <result property="createTime" column="CREATE_TIME_" jdbcType="TIMESTAMP" />
+    <result property="endTime" column="END_TIME_" jdbcType="TIMESTAMP" />
+    <result property="incidentMessage" column="INCIDENT_MSG_" jdbcType="VARCHAR" />
+    <result property="incidentType" column="INCIDENT_TYPE_" jdbcType="VARCHAR" />
+    <result property="activityId" column="ACTIVITY_ID_" jdbcType="VARCHAR" />
+    <result property="causeIncidentId" column="CAUSE_INCIDENT_ID_" jdbcType="VARCHAR" />
+    <result property="rootCauseIncidentId" column="ROOT_CAUSE_INCIDENT_ID_" jdbcType="VARCHAR" />
+    <result property="configuration" column="CONFIGURATION_" jdbcType="VARCHAR" />
+    <result property="incidentState" column="INCIDENT_STATE_" jdbcType="INTEGER" />
+    <result property="tenantId" column="TENANT_ID_" jdbcType="VARCHAR" />
+    <result property="jobDefinitionId" column="JOB_DEF_ID_" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <!-- HISTORIC INCIDENT SELECT -->
+
+  <select id="selectHistoricIncidentByQueryCriteria" parameterType="org.camunda.bpm.engine.impl.HistoricIncidentQueryImpl" resultMap="historicIncidentResultMap">
+    <include refid="org.camunda.bpm.engine.impl.persistence.entity.Commons.bindOrderBy"/>
+    ${limitBefore}
+    select ${distinct} RES.*
+    ${limitBetween}
+    <include refid="selectHistoricIncidentByQueryCriteriaSql"/>
+    ${orderBy}
+    ${limitAfter}
+  </select>
+
+  <select id="selectHistoricIncidentCountByQueryCriteria" parameterType="org.camunda.bpm.engine.impl.HistoricIncidentQueryImpl" resultType="long">
+    select count(distinct RES.ID_)
+    <include refid="selectHistoricIncidentByQueryCriteriaSql"/>
+  </select>
+
+  <sql id="selectHistoricIncidentByQueryCriteriaSql">
+    from ${prefix}ACT_HI_INCIDENT RES
+
+    <if test="authCheck.isAuthorizationCheckEnabled &amp;&amp; !authCheck.revokeAuthorizationCheckEnabled &amp;&amp; authCheck.authUserId != null">
+      <include refid="org.camunda.bpm.engine.impl.persistence.entity.AuthorizationEntity.authCheckJoinWithoutOnClause"/>
+      AUTH ON (AUTH.RESOURCE_ID_ in (RES.PROC_DEF_KEY_, '*'))
+    </if>
+
+    <where>
+      <if test="id != null">
+        RES.ID_ = #{id}
+      </if>
+      <if test="incidentType != null">
+        and RES.INCIDENT_TYPE_ = #{incidentType}
+      </if>
+      <if test="incidentMessage != null">
+        and RES.INCIDENT_MSG_ = #{incidentMessage}
+      </if>
+      <if test="executionId != null">
+        and RES.EXECUTION_ID_ = #{executionId}
+      </if>
+      <if test="activityId != null">
+        and RES.ACTIVITY_ID_ = #{activityId}
+      </if>
+      <if test="processInstanceId != null">
+        and RES.PROC_INST_ID_ = #{processInstanceId}
+      </if>
+      <if test="processDefinitionId != null">
+        and RES.PROC_DEF_ID_ = #{processDefinitionId}
+      </if>
+      <if test="causeIncidentId != null">
+        and RES.CAUSE_INCIDENT_ID_ = #{causeIncidentId}
+      </if>
+      <if test="rootCauseIncidentId != null">
+        and RES.ROOT_CAUSE_INCIDENT_ID_ = #{rootCauseIncidentId}
+      </if>
+      <if test="configuration != null">
+        and RES.CONFIGURATION_ = #{configuration}
+      </if>
+      <if test="incidentState != null">
+        and RES.INCIDENT_STATE_ = #{incidentState.stateCode}
+      </if>
+      <if test="tenantIds != null &amp;&amp; tenantIds.length > 0">
+        and RES.TENANT_ID_ in
+        <foreach item="tenantId" index="index" collection="tenantIds"
+                 open="(" separator="," close=")">
+          #{tenantId}
+        </foreach>
+      </if>
+      <if test="jobDefinitionIds != null &amp;&amp; jobDefinitionIds.length > 0">
+        and RES.JOB_DEF_ID_ in
+        <foreach item="jobDefinitionId" index="index" collection="jobDefinitionIds"
+                 open="(" separator="," close=")">
+          #{jobDefinitionId}
+        </foreach>
+      </if>
+
+      <if test="authCheck.isAuthorizationCheckEnabled &amp;&amp; authCheck.authUserId != null">
+        <!-- incident exists in context of a process definition -->
+        and (
+          (RES.PROC_DEF_ID_ is not null
+          <include refid="org.camunda.bpm.engine.impl.persistence.entity.AuthorizationEntity.queryAuthorizationCheck"/>
+          ) or RES.PROC_DEF_ID_ is null
+        )
+      </if>
+
+      <include refid="org.camunda.bpm.engine.impl.persistence.entity.TenantEntity.queryTenantCheck" />
+
+    </where>
+  </sql>
+
+  <sql id="selectHistoricIncidentsByBatchIds">
+    select distinct HI.ID_
+    <include refid="selectHistoricIncidentsByBatchIdsSql" />
+  </sql>
+
+  <sql id="selectHistoricIncidentsByBatchIdsSql">
+    from ${prefix}ACT_HI_INCIDENT HI
+    inner join ${prefix}ACT_HI_BATCH HB
+    on HI.JOB_DEF_ID_ in
+      (HB.SEED_JOB_DEF_ID_,
+       HB.MONITOR_JOB_DEF_ID_,
+       HB.BATCH_JOB_DEF_ID_)
+    where
+      <bind name="listOfIds" value="list"/>
+      <bind name="fieldName" value="'HB.ID_'"/>
+      <include refid="org.camunda.bpm.engine.impl.persistence.entity.Commons.applyInForPaginatedCollection"/>
+      and HI.JOB_DEF_ID_ is not null
+  </sql>
+
+</mapper>
